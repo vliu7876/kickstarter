@@ -1,0 +1,12 @@
+name: kickviz
+title: kickviz
+username:
+account: victoria-l
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3380969
+bundleId: 3971906
+url: https://victoria-l.shinyapps.io/kickviz/
+when: 1607624369.20309
+asMultiple: FALSE
+asStatic: FALSE
