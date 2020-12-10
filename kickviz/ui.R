@@ -32,6 +32,9 @@ dashboardPage(
             #first tab
             tabItem(tabName = "Prelim",
                     fluidRow(
+                        valueBox("kickstarter", "Data as of 3/3/2018",
+                            width=12
+                        ),
                         box(title="Inputs",
                             status="primary",
                             width=12,
@@ -43,60 +46,88 @@ dashboardPage(
                             status="primary",
                             width=12,
                             solidHeader=TRUE,
-                            plotlyOutput("plot")
+                            plotlyOutput("projplot")
                         ),
                         
                         box(width=12,
                             title="info",
                             solidHeader=TRUE,
                             uiOutput("datesUI") 
-                            # dateRangeInput("daterange", 
-                            #                label = h3("Date range"),
-                            #                min = "2009-05-03",
-                            #                max = "2018-03-03",
-                            #                format = "mm/dd/yy",
-                            #                separator=" - ")),
-                            
-                        ),
-                        box(width=6,
-                            title="PEOPLE",
-                            solidHeader=TRUE,
-                            valueBoxOutput(width=12, "outA")
-                        ),
-                        box(width=6,
-                            title="PEOPLE",
-                            solidHeader=TRUE,
-                            valueBoxOutput(width=12, "outC")
                         ),
                         box(width=12,
                             title="OVERALL",
                             solidHeader=TRUE,
-                            valueBoxOutput(width=12, "outE")
+                            valueBoxOutput(width=12, "outpledged"),
+                            valueBoxOutput(width=12, "outfunded"),
+                            valueBoxOutput(width=12, "outpropsuccess")
                         ),
-                        box(width=6,
+                        box(width=4,
+                            title="PEOPLE",
+                            solidHeader=TRUE,
+                            valueBoxOutput(width=12, "outbackers")
+                        ),
+                        box(width=4,
                             title="PROJECT",
                             solidHeader=TRUE,
-                            valueBoxOutput(width=12, "outD")
+                            valueBoxOutput(width=12, "outgoal")
                         ),
-                        box(width=6,
+                        box(width=4,
                             title="PROJECT",
                             solidHeader=TRUE,
-                            valueBoxOutput(width=12, "outB")
-                        ),
-                        
-                        
-                        
+                            valueBoxOutput(width=12, "outsuccess")
+                        )
+
+
                     )
             ),
             
             #second tab
             tabItem(tabName = "Understanding",
                     fluidRow(
+                        box(
+                            width=NULL,
+                            selectInput("projbycountry", "Select Country:", choices= c(" "," "))
+                        ),
+                        tabBox(
+                            title="Big Picture",
+                            id="tab1",
+                            width=12,
+                            height= "500px",
+                            tabPanel("Projects by Country", plotlyOutput("projbycountryplot")),
+                            tabPanel("Funded Breakdown", plotlyOutput("fundedplot"))
+                        )),
+                    fluidRow(
+                        valueBox("In Depth", "Data on Success",
+                                 width=12
+                        ),
+                        tabBox(
+                            id="tab2",
+                            width=6,
+                            height= "450px",
+                            tabPanel("Boxplot", plotlyOutput("goalsboxplot")),
+                            tabPanel("Successful Goals",plotlyOutput("successgoalhist")),
+                            tabPanel("Unsuccessful Goals", plotlyOutput("unsuccessgoalhist"))
+                        ),
+                        tabBox(
+                            side="right",
+                            height="450px",
+                            tabPanel("Unsuccessful Backers", plotlyOutput("unsuccessbackershist")),
+                            tabPanel("Successful Backers", plotlyOutput("successbackershist")),
+                            tabPanel("Boxplot", plotlyOutput("backersboxplot"))
+                        )
+                    ),
+                    fluidRow(
                         box(width=12,
                             status="info",
-                            title="Funded",
-                            solidHeader=TRUE)
+                            title= "Scope of Data",
+                            solidHeader = TRUE,
+                            valueBoxOutput(width=6, "maxpledged"),
+                            valueBoxOutput(width=6, "maxbackers"),
+                            valueBoxOutput(width=6, "maxpledgedInfo"),
+                            valueBoxOutput(width=6, "maxbackersInfo")
+                        )
                     )
+                    
             ),
             #third tab
             tabItem(tabName="Inference",

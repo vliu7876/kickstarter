@@ -33,7 +33,6 @@ shinyServer(function(input, output, session) {
                           choices=c("All Countries", unique(kic0$country)))
     }, once=TRUE)
     
-    ## observe category: can this be here simultaneously with above/^?
     observeEvent(input$category, {
         kic0 <- kic() %>% filter(category %in% c("Art","Design","Fashion","Film","Food",
                                                  "Games","Music", "Publishing", "Tech", "Theater"))
@@ -52,6 +51,18 @@ shinyServer(function(input, output, session) {
                           choices=c("All Countries", unique(kic0$country)))
     }, once=TRUE)
     
+    observeEvent(input$projbycountry, {
+        kic0 <- kic() %>% filter(category %in% c("Art","Design","Fashion","Film","Food",
+                                                 "Games","Music", "Publishing", "Tech", "Theater")) %>%
+            filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL")) 
+        
+        updateSelectInput(session, "projbycountry", 
+                          choices=c("All Countries", unique(kic0$country)))
+    }, once=TRUE)
+    
+    
+    ## FIRST SIDE TAB 
+    
     ## dates UI
     output$datesUI <- renderUI({
         mydates <- req(kic()) %>%
@@ -69,7 +80,7 @@ shinyServer(function(input, output, session) {
     
     ## plot output
     # rendering plot
-    output$plot <- renderPlotly({
+    output$projplot <- renderPlotly({
         #%>% group_by(country) %>% count(country, sort=TRUE)  
         if(input$country=="All Countries"){
             kic1 <- kic() %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL")) %>% 
@@ -81,12 +92,6 @@ shinyServer(function(input, output, session) {
                 mutate(countr = fct_lump(country, n=8)) %>% 
                 count(countr)
         }
-        # anno <- list(x=2,
-        #              y=18,
-        #              text="2018",
-        #              showarrow=FALSE,
-        #              font = list(color="lightgrey",
-        #                          size=42))
         
         countrychart <- plot_ly(data=kic1, 
                                 type="bar", 
@@ -100,8 +105,9 @@ shinyServer(function(input, output, session) {
         return(countrychart)
         
     })
-    ## info boxes
-    output$outA <- renderValueBox({
+
+    ## INFO BOXES
+    output$outpledged <- renderValueBox({
         if(input$country == "All Countries"){
             kic1 <- kic() %>% filter(deadline >= req(input$dates[1]), deadline <= req(input$dates[2]))
         }
@@ -113,12 +119,12 @@ shinyServer(function(input, output, session) {
         valueBox(
             value=total1,
             color="olive",
-            subtitle="Total Amount Pledged",
-            icon= icon("money-bill-wave", lib = "font-awesome")
+            subtitle="Total Pledged",
+            
         )
     })
     
-    output$outB <- renderValueBox({
+    output$outsuccess <- renderValueBox({
         
         if(input$country == "All Countries"){
             kic1 <- kic() %>% filter(deadline >= req(input$dates[1]), deadline <= req(input$dates[2]))
@@ -134,7 +140,7 @@ shinyServer(function(input, output, session) {
             icon= icon("chart-line", lib = "font-awesome")
         )
     })
-    output$outC <- renderValueBox({
+    output$outbackers <- renderValueBox({
         
         if(input$country == "All Countries"){
             kic1 <- kic() %>% filter(deadline >= req(input$dates[1]), deadline <= req(input$dates[2]))
@@ -150,7 +156,7 @@ shinyServer(function(input, output, session) {
             icon= icon("user-friends", lib = "font-awesome")
         )
     })
-    output$outD <- renderValueBox({
+    output$outgoal <- renderValueBox({
         
         if(input$country == "All Countries"){
             kic1 <- kic() %>% filter(deadline >= req(input$dates[1]), deadline <= req(input$dates[2]))
@@ -167,7 +173,7 @@ shinyServer(function(input, output, session) {
             icon= icon("dollar", lib = "font-awesome")
         )
     })
-    output$outE <- renderValueBox({
+    output$outpropsuccess <- renderValueBox({
         if(input$country == "All Countries"){
             kic1 <- kic() %>% filter(deadline >= req(input$dates[1]),deadline <= req(input$dates[2]))
         }
@@ -187,6 +193,308 @@ shinyServer(function(input, output, session) {
         )
     })
     
+    output$outfunded <- renderValueBox({
+        if(input$country == "All Countries"){
+            kic1 <- kic() %>% filter(deadline >= req(input$dates[1]),deadline <= req(input$dates[2]))
+        }
+        else{
+            kic1 <- kic() %>% filter(deadline >= req(input$dates[1]),deadline <= req(input$dates[2])) %>%
+                filter(country== input$country)
+        }
+        len <- nrow(kic1)
+        
+        kic2 <- kic1 %>% filter(state=="successful")
+        total1 <- sum(kic2$usd_pledged_real)
+        
+        valueBox(
+            value= total1 %>% prettyNum(big.mark = ","),
+            color="maroon",
+            subtitle="Total Funded",
+            icon= icon("dollar", lib = "font-awesome")
+        )
+    })
+    
+    ## SECOND SIDE TAB
+    
+    ## PROJECT COUNTRY/CATEGORY PLOT
+    output$projbycountryplot <- renderPlotly({
+        #%>% group_by(country) %>% count(country, sort=TRUE)  
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic()
+        }
+        else{
+            kic1 <- kic() %>% filter(country %in% input$projbycountry) 
+        }
+        kic2 <- kic1 %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country) %>% count(category, country) %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))  
+        projchart <- plot_ly(data=kic2, 
+                               type="bar", 
+                               x=~n,
+                               y=~country,
+                               orientation='h',
+                               color=~reorder(category, n),
+                               text = paste0("Country: ", kic2$country, "<br>",
+                                             "Project Total: ", kic2$n%>% prettyNum(big.mark = ",") , "<br>",
+                                             "Category: ", kic2$category, "<br>"),
+                               hoverinfo="text") %>% 
+            layout(title= "Project Totals By Country",
+                   xaxis= list(title="Counts"),
+                   yaxis= list(title="Country (Top 8)"),
+                   barmode= 'stack')
+        return(projchart)
+    })
+    
+    ## FUNDED PLOT
+    output$fundedplot <- renderPlotly({
+        #%>% group_by(country) %>% count(country, sort=TRUE)  
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic()
+        }
+        else{
+            kic1 <- kic() %>% filter(country %in% input$projbycountry) 
+        }
+        kic2 <- kic1%>% filter(state == "successful") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country) %>% count(category, country) %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater")) %>%
+            mutate(prop = n/sum(n))
+        fundedchart <- plot_ly(data=kic2, 
+                               type="bar", 
+                               x=~n,
+                               y=~country,
+                               orientation='h',
+                               color=~reorder(category, n),
+                               text = paste0("Country: ", kic2$country, "<br>",
+                                             "Funded in Country: ",round(kic2$prop,3)*100,"%", "<br>",
+                                             "Category: ", kic2$category, "<br>"),
+                               hoverinfo="text") %>% 
+            layout(title= "Funded Projects By Country",
+                   xaxis= list(title="$"),
+                   yaxis= list(title="Country (Top 8)"),
+                   barmode='stack')
+        return(fundedchart)
+        
+    })
+    ## HISTOGRAMS
+    
+    output$successgoalhist <- renderPlotly({
+        #%>% group_by(country) %>% count(country, sort=TRUE)  
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic()
+        }
+        else{
+            kic1 <- kic() %>% filter(country %in% input$projbycountry) 
+        }
+        kic2 <- kic1 %>% filter(state == "successful") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country) %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))  
+        sgoalhist <- plot_ly(data=kic2,
+                             x=~kic2$usd_goal_real,
+                             type="histogram"
+        ) %>% 
+            layout(title= "Successful Goals",
+                   yaxis= list(title="Counts"),
+                   xaxis= list(title="Goal Amounts ($)"),
+                   barmode= 'stack')
+        return(sgoalhist)
+        
+    })
+    output$unsuccessgoalhist <- renderPlotly({
+        #%>% group_by(country) %>% count(country, sort=TRUE)  
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic()
+        }
+        else{
+            kic1 <- kic() %>% filter(country %in% input$projbycountry) 
+        }
+        kic2 <- kic1%>% filter(state == "failed") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country)  %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))  
+        usgoalhist <- plot_ly(data=kic2,
+                              x=~kic2$usd_goal_real,
+                              type="histogram"
+        ) %>% 
+            layout(title= "Unsuccessful Goals",
+                   yaxis= list(title="Counts", range=c(0,10000)),
+                   xaxis= list(title="Goal Amounts ($)", range=c(0,2000000)),
+                   barmode= 'stack')
+        return(usgoalhist)
+        
+    })
+    
+    output$unsuccessbackershist <- renderPlotly({
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic()
+        }
+        else{
+            kic1 <- kic() %>% filter(country %in% input$projbycountry) 
+        }
+        kic2 <- kic1%>% filter(state == "failed") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country)  %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))  
+        unsuccessbackershist <- plot_ly(data=kic2,
+                                        x=~kic2$backers,
+                                        type="histogram"
+        ) %>% 
+            layout(title= "Unsuccessful Backers",
+                   yaxis= list(title="Counts"),
+                   xaxis= list(title="Backers", range=c(0,100)),
+                   barmode= 'stack')
+        return(unsuccessbackershist)
+    })
+    output$successbackershist <- renderPlotly({
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic()
+        }
+        else{
+            kic1 <- kic() %>% filter(country %in% input$projbycountry) 
+        }
+        kic2 <- kic1%>% filter(state == "successful") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country)  %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))  
+        unsuccessbackershist <- plot_ly(data=kic2,
+                                        x=~kic2$backers,
+                                        type="histogram"
+        ) %>% 
+            layout(title= "Successful Backers",
+                   yaxis= list(title="Counts"),
+                   xaxis= list(title="Backers", range=c(0,1000)),
+                   barmode= 'stack')
+        return(successbackershist)
+        
+        
+    })
+    
+    ## BOXPLOTS
+    output$goalsboxplot <- renderPlotly({
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic()
+        }
+        else{
+            kic1 <- kic() %>% filter(country %in% input$projbycountry) 
+        }
+        kic2 <- kic1%>% filter(state == "successful") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country)  %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater")) 
+        
+        kic3 <- kic1%>% filter(state == "failed") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country)  %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater")) 
+        
+        goalsboxplot <- plot_ly(data=kic3,
+                                  x=~kic3$usd_goal_real,
+                                  type="box",
+                                  name="Unsuccessful Projects"
+        ) %>% 
+            layout(title= "Distribution of Project Goals",
+                   xaxis= list(title="Goals", range=c(0,1000000)),
+                   barmode= 'stack') %>% add_trace(x=~kic2$usd_goal_real, name="Successful Projects")
+        return(goalsboxplot)
+        
+    })
+    
+    output$backersboxplot <- renderPlotly({  
+        if(input$projbycountry=="All Countries"){
+        kic1 <- kic()
+    }
+        else{
+            kic1 <- kic() %>% filter(country %in% input$projbycountry) 
+        }
+        kic2 <- kic1%>% filter(state == "successful") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country)  %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater")) 
+        
+        kic3 <- kic1%>% filter(state == "failed") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL"))  %>% 
+            group_by(country)  %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater")) 
+        
+        backersboxplot <- plot_ly(data=kic3,
+                x=~kic3$backers,
+                type="box",
+                name="Unsuccessful Projects"
+        ) %>% 
+            layout(title= "Distribution of Project Backers",
+                   xaxis= list(title="Backers", range=c(0,7000)),
+                   barmode= 'stack') %>% add_trace(x=~kic2$backers, name="Successful Projects")
+        return(backersboxplot)
+        
+    })
+    ## INFO BOXES
+    output$maxpledged <- renderInfoBox({
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic() %>% 
+                filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))
+        }
+        else{
+            kic1 <- kic() %>% 
+                filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))%>% 
+                filter(country %in% input$projbycountry) 
+        }
+        maxpledged <- max(kic1$usd_pledged_real) 
+        extraction <- kic1[kic1$usd_pledged_real==maxpledged,]
+        infoBox(
+            "Highest pledged",maxpledged %>% prettyNum(big.mark = ","),color="maroon", fill=TRUE,
+            icon= icon("money-bill-wave", lib = "font-awesome")
+        )
+        
+    })
+    
+    output$maxpledgedInfo <- renderInfoBox({
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic() %>% 
+                filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))
+        }
+        else{
+            kic1 <- kic() %>% 
+                filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))%>% 
+                filter(country %in% input$projbycountry) 
+        }
+        maxpledged <- max(kic1$usd_pledged_real) 
+        extraction <- kic1[kic1$usd_pledged_real==maxpledged,]
+        
+        infoBox(
+            "Project Info", HTML(paste0("Name: ",extraction$name,br(), "Location: ", extraction$country)),color = "yellow"
+        )
+    })
+    
+    output$maxbackers <- renderInfoBox({
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic() %>% 
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))
+            
+        }
+        else{
+            kic1 <- kic()%>% 
+                filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))%>% 
+                filter(country %in% input$projbycountry)  
+        }
+        maxbackers <- max(kic1$backers) 
+        extraction <- kic1[kic1$backers==maxbackers,]
+        
+        infoBox(
+            "Highest number of backers", maxbackers %>% prettyNum(big.mark = ","), color="maroon", fill=TRUE,
+            icon= icon("user-friends", lib = "font-awesome")
+        )
+    })
+    
+    output$maxbackersInfo <- renderInfoBox({
+        if(input$projbycountry=="All Countries"){
+            kic1 <- kic() %>% 
+                filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))
+        }
+        else{
+            kic1 <- kic() %>% 
+                filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))%>% 
+                filter(country %in% input$projbycountry) 
+        }
+        maxbackers <- max(kic1$backers) 
+        extraction <- kic1[kic1$backers==maxbackers,]
+        infoBox(
+            "Project Info", HTML(paste0("Name: ",extraction$name, br(),"Location: ", extraction$country)),color = "yellow"
+        )
+    })
+    
+    ## THIRD SIDE TAB
     output$outPred <- renderInfoBox({
         catval <- 0
         locval <- 0
