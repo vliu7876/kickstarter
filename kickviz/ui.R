@@ -47,14 +47,14 @@ dashboardPage(
                       
                         box(title="Country",
                             status="warning",
-                            width=12,
+                            width=6,
                             solidHeader=TRUE,
                             selectInput("country", "Select Country:", 
                                         choices= c(" "," ")),
                             height="125px"
                         ),
                         
-                        box(width=12,
+                        box(width=6,
                             title="Scope",
                             status="warning",
                             solidHeader=TRUE,
@@ -70,25 +70,14 @@ dashboardPage(
                         box(width=12,
                             title="Summary Statistics",
                             solidHeader=TRUE,
-                            valueBoxOutput(width=12, "outpledged"),
-                            valueBoxOutput(width=12, "outfunded"),
-                            valueBoxOutput(width=12, "outpropsuccess")
-                        ),
-                        box(width=4,
-                            title="PEOPLE",
-                            solidHeader=TRUE,
-                            valueBoxOutput(width=12, "outbackers")
-                        ),
-                        box(width=4,
-                            title="PROJECT",
-                            solidHeader=TRUE,
-                            valueBoxOutput(width=12, "outgoal")
-                        ),
-                        box(width=4,
-                            title="PROJECT",
-                            solidHeader=TRUE,
-                            valueBoxOutput(width=12, "outsuccess")
+                            valueBoxOutput(width=4, "outpledged"),
+                            valueBoxOutput(width=4, "outfunded"),
+                            valueBoxOutput(width=4, "outpropsuccess"),
+                            valueBoxOutput(width=4, "outbackers"),
+                            valueBoxOutput(width=4, "outgoal"),
+                            valueBoxOutput(width=4, "outsuccess")
                         )
+                       
 
 
                     )
@@ -103,7 +92,7 @@ dashboardPage(
                         box(
                             title="Country",
                             solidHeader=TRUE,
-                            width=12,
+                            width=6,
                             status="warning",
                             selectInput("country2ndtab", "Select Country:", choices= c(" "," "))
                         ),
@@ -111,7 +100,7 @@ dashboardPage(
                         title="Category",
                         solidHeader = TRUE,
                         status="warning",
-                        width=12,
+                        width=6,
                         selectInput("category2ndtab", "Select Category:", choices= c(" "," "))
                         
                     )
@@ -160,24 +149,18 @@ dashboardPage(
             ## THIRD TAB
             tabItem(tabName="Inference",
                     fluidRow(
-                        valueBox("Predicting Success", "What are your chances?",
+                        valueBox("Predicting Success", "What are your chances? Utilising values from 1MM samples from a Bayesian Generalized Linear Mixed Model",
                                  width=12
-                        )),
-                    fluidRow(
-                        infoBox(width=12,
-                                title= "Log-Odds of Success",
-                                "=.813-.0001974*Goal+.04059*Backers-0.017372*Days+Category+Country",
-                                icon= icon("battle-net", lib = "font-awesome"),
-                                color="maroon"
                         ),
-                        box(width=12,
-                            status="info",
-                            title="Prediction from Bayesian Generalized Linear Mixed Model",
-                            solidHeader=TRUE,
-                            valueBoxOutput(width=6, "outPred"),
-                            valueBoxOutput(width=6, "outProb")
-                        ),
-                        box(width=12,
+
+                        # infoBox(width=12,
+                        #         title= "Log-Odds of Success",
+                        #         "=.813-.0001974*Goal+.04059*Backers-0.017372*Days+Category+Country",
+                        #         icon= icon("battle-net", lib = "font-awesome"),
+                        #         color="maroon"
+                        # ),
+
+                        box(width=6,
                             status="warning",
                             title="Calculation",
                             solidHeader=TRUE,
@@ -189,6 +172,13 @@ dashboardPage(
                             sliderInput("backerslider", "Number of Backers:", 1, 1000, 50),
                             sliderInput("dayslider", "Duration in Days:", 1, 60, 30)
 
+                        ),
+                        tabBox(
+                            title="Prediction",
+                            height="200px",
+                            tabPanel("Probability of Success", valueBoxOutput(width=12, "outProb")),
+                            tabPanel("Odds of Success", valueBoxOutput(width=12, "outPred")),
+                            tabPanel("Log-Odds Model", infoBoxOutput(width=12, "logoddsmodel"))
                         )
                         
                         

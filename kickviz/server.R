@@ -137,7 +137,7 @@ shinyServer(function(input, output, session) {
         valueBox(
             value=total1,
             width=12,
-            color="teal",
+            color="maroon",
             subtitle="Total Pledged",
             icon= icon("comments-dollar", lib = "font-awesome")
             
@@ -173,7 +173,7 @@ shinyServer(function(input, output, session) {
         valueBox(
             value=total1,
             subtitle="Backers",
-            color="purple",
+            color="teal",
             icon= icon("users", lib = "font-awesome")
         )
     })
@@ -190,7 +190,7 @@ shinyServer(function(input, output, session) {
         valueBox(
             value=total1,
             subtitle="Project Goals",
-            color="light-blue",
+            color="orange",
             icon= icon("bullseye", lib = "font-awesome")
         )
     })
@@ -208,7 +208,7 @@ shinyServer(function(input, output, session) {
         
         valueBox(
             value= total2 %>% prettyNum(big.mark = ","),
-            color="orange",
+            color="red",
             subtitle="Proportion of Success",
             icon= icon("percent", lib = "font-awesome")
         )
@@ -229,7 +229,7 @@ shinyServer(function(input, output, session) {
         
         valueBox(
             value= total1 %>% prettyNum(big.mark = ","),
-            color="maroon",
+            color="light-blue",
             subtitle="Total Funded",
             icon= icon("money-bill-wave", lib = "font-awesome")
         )
@@ -331,7 +331,7 @@ shinyServer(function(input, output, session) {
                    yaxis= list(title="Counts"),
                    xaxis= list(title="Goal Amounts ($)"),
                    barmode= 'stack')
-        return(sgoalhist)
+        return(sgoalhist) %>% config(displayModeBar = F)
         
     })
     output$unsuccessgoalhist <- renderPlotly({
@@ -359,7 +359,7 @@ shinyServer(function(input, output, session) {
                    yaxis= list(title="Counts"), #, range=c(0,10000)),
                    xaxis= list(title="Goal Amounts ($)"), #, range=c(0,2000000)),
                    barmode= 'stack')
-        return(usgoalhist)
+        return(usgoalhist) %>% config(displayModeBar = F)
         
     })
     
@@ -386,7 +386,7 @@ shinyServer(function(input, output, session) {
             layout(title= "Unsuccessful Backers",
                    yaxis= list(title="Counts"),
                    xaxis= list(title="Backers"), # range=c(0,100)),
-                   barmode= 'stack')
+                   barmode= 'stack') %>% config(displayModeBar = F)
         return(unsuccessbackershist)
     })
     output$successbackershist <- renderPlotly({
@@ -412,7 +412,7 @@ shinyServer(function(input, output, session) {
             layout(title= "Successful Backers",
                    yaxis= list(title="Counts"),
                    xaxis= list(title="Backers"), #range=c(0,1000)),
-                   barmode= 'stack')
+                   barmode= 'stack') %>% config(displayModeBar = F)
         return(successbackershist)
         
         
@@ -447,7 +447,9 @@ shinyServer(function(input, output, session) {
         ) %>% 
             layout(title= "Distribution of Project Goals",
                    xaxis= list(title="Goals"), #range=c(0,1000000)),
-                   barmode= 'stack') %>% add_trace(x=~kic2$usd_goal_real, name="Successful Projects")
+                   barmode= 'stack') %>% add_trace(x=~kic2$usd_goal_real, name="Successful Projects")%>% 
+            config(displayModeBar = F)
+        
         return(goalsboxplot)
         
     })
@@ -480,7 +482,8 @@ shinyServer(function(input, output, session) {
         ) %>% 
             layout(title= "Distribution of Project Backers",
                    xaxis= list(title="Backers"), #range=c(0,7000)),
-                   barmode= 'stack') %>% add_trace(x=~kic2$backers, name="Successful Projects")
+                   barmode= 'stack') %>% add_trace(x=~kic2$backers, name="Successful Projects") %>% 
+            config(displayModeBar = F)
         return(backersboxplot)
         
     })
@@ -525,7 +528,7 @@ shinyServer(function(input, output, session) {
 
         infoBox("Average pledged per project", 
                 mean(kic1$usd_pledged_real)%>% prettyNum(big.mark = ","), 
-                color="red", fill=TRUE,
+                color="teal", fill=TRUE,
                 icon= icon("comments-dollar", lib = "font-awesome")
         )
         
@@ -548,7 +551,9 @@ shinyServer(function(input, output, session) {
         extraction <- kic1[kic1$usd_pledged_real==maxpledged,]
         
         infoBox(
-            "Project Info", HTML(paste0("Name: ",extraction$name,br(), "Location: ", extraction$country)),color = "yellow"
+            "Project Info", HTML(paste0("Name: ",extraction$name,br(), "Location: ", extraction$country)),
+            color = "orange",
+            icon= icon("medal", lib = "font-awesome")
         )
     })
     
@@ -590,7 +595,7 @@ shinyServer(function(input, output, session) {
 
         infoBox("Average backers per project", 
                 mean(kic1$backers)%>% prettyNum(big.mark = ","), 
-                color="red", fill=TRUE,
+                color="teal", fill=TRUE,
                 icon= icon("user-friends", lib = "font-awesome")
         )
         
@@ -612,7 +617,9 @@ shinyServer(function(input, output, session) {
         maxbackers <- max(kic1$backers) 
         extraction <- kic1[kic1$backers==maxbackers,]
         infoBox(
-            "Project Info", HTML(paste0("Name: ",extraction$name, br(),"Location: ", extraction$country)),color = "yellow"
+            "Project Info", HTML(paste0("Name: ",extraction$name, br(),"Location: ", extraction$country)),
+            color = "orange",
+            icon= icon("award", lib = "font-awesome")
         )
     })
     
@@ -691,11 +698,19 @@ shinyServer(function(input, output, session) {
         if(predprob >=1) {predprob <-1}
         infoBox(
             "probability", round(predprob,3), 
-            color="orange", 
+            color="maroon", 
             fill=TRUE,
             icon= icon("dice", lib = "font-awesome")
         )
         
+    })
+    output$logoddsmodel <- renderInfoBox({
+        infoBox(
+            "Category/Country Random Effects", "=.813-.0001974*Goal+.04059*Backers-0.017372*Days+Category+Country",
+            color="orange",
+            icon=icon("equals", lib = "font-awesome"),
+            fill=TRUE
+        )
     })
     
 })   
