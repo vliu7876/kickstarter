@@ -248,7 +248,8 @@ shinyServer(function(input, output, session) {
         }
         kic2 <- kic1 %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL", "NZ", "HK", "SG"))  %>% 
             group_by(country) %>% count(category, country) %>% 
-            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater"))  
+            filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater")) %>%
+            mutate(sum = sum(n))
         projchart <- plot_ly(data=kic2, 
                                type="bar", 
                                x=~n,
@@ -256,8 +257,10 @@ shinyServer(function(input, output, session) {
                                orientation='h',
                                color=~reorder(category, n),
                                text = paste0("Country: ", kic2$country, "<br>",
+                                             "Category: ", kic2$category, "<br>",
                                              "Project Total: ", kic2$n%>% prettyNum(big.mark = ",") , "<br>",
-                                             "Category: ", kic2$category, "<br>"),
+                                             "Country Total: ", kic2$sum %>% prettyNum(big.mark = ",") , "<br>"
+                                             ),
                                hoverinfo="text") %>% 
             layout(title= "Number of Projects By Country",
                    xaxis= list(title="Counts"),
@@ -284,7 +287,7 @@ shinyServer(function(input, output, session) {
         kic2 <- kic1%>% filter(state == "successful") %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL", "NZ", "HK", "SG"))  %>% 
             group_by(country) %>% count(category, country) %>% 
             filter(category %in% c("Art","Design","Fashion","Film","Food", "Games","Music", "Publishing", "Tech", "Theater")) %>%
-            mutate(prop = n/sum(n))
+            mutate(prop = n/sum(n)) %>% mutate(sum=sum(n))
         fundedchart <- plot_ly(data=kic2, 
                                type="bar", 
                                x=~n,
@@ -292,8 +295,10 @@ shinyServer(function(input, output, session) {
                                orientation='h',
                                color=~reorder(category, n),
                                text = paste0("Country: ", kic2$country, "<br>",
-                                             "Funded in Country: ",round(kic2$prop,3)*100,"%", "<br>",
-                                             "Category: ", kic2$category, "<br>"),
+                                             "Category: ", kic2$category, "<br>",
+                                             "Percent Funded in Country: ",round(kic2$prop,3)*100,"%", "<br>",
+                                             "Total Projects Funded in Country: ", kic2$sum %>% prettyNum(big.mark = ","), "<br>"
+                                             ),
                                hoverinfo="text") %>% 
             layout(title= "Funded Projects By Country",
                    xaxis= list(title="$"),
