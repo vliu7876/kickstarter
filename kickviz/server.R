@@ -560,8 +560,8 @@ shinyServer(function(input, output, session) {
         extraction <- kic1[kic1$usd_pledged_real==maxpledged,]
         
         infoBox(
-            "Project Info", HTML(paste0("Name: ",extraction$name, br(), br(), "USD Raised: ", extraction$usd_pledged_real %>% prettyNum(big.mark = ","), br(), br(), 
-                                        "Status: ", extraction$state, br(), br(), "Location: ", extraction$country)),
+            "Project Info", HTML(paste0("Name: ",extraction$name, br(), "USD Raised: ", extraction$usd_pledged_real %>% prettyNum(big.mark = ","), br(), 
+                                        "Status: ", extraction$state, br(), "Location: ", extraction$country)),
             color = "orange",
             icon= icon("medal", lib = "font-awesome")
         )
@@ -627,8 +627,8 @@ shinyServer(function(input, output, session) {
         maxbackers <- max(kic1$backers) 
         extraction <- kic1[kic1$backers==maxbackers,]
         infoBox(
-            "Project Info", HTML(paste0("Name: ",extraction$name, br(), br(),"Backers: ", extraction$backers %>% prettyNum(big.mark = ","), br(), br(), 
-                                        "Status: ", extraction$state, br(), br(), "Location: ", extraction$country)),
+            "Project Info", HTML(paste0("Name: ",extraction$name, br(),"Backers: ", extraction$backers %>% prettyNum(big.mark = ","), br(), 
+                                        "Status: ", extraction$state, br(), "Location: ", extraction$country)),
             color = "orange",
             icon= icon("award", lib = "font-awesome")
         )
@@ -726,7 +726,11 @@ shinyServer(function(input, output, session) {
     
     output$modelpriors <- renderInfoBox({
         infoBox(
-            "Priors Utilised in Model", "Pledged, Goal, Backers, Time ~ N(0, sd=10000). Country, Category: Random Effects.",
+            "Priors Utilised in Model", HTML(paste0("Pledged, Goal, Backers, Time ~ N(0, sd=10000)", br(), 
+                                                    "Country ~ N(0, sd = Sigma_Country)", br(), 
+                                                    "Category ~ N(0, sd = Sigma_Category)", br(), 
+                                                    "Sigma_Country, Sigma_Category ~ Unif(1,10000)"
+                                                    )),
             color="olive",
             icon=icon("filter", lib = "font-awesome"),
             fill=TRUE

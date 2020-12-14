@@ -87,7 +87,7 @@ dashboardPage(
                                       "- Predictions on the third tab should be taken as estimations and not depictions of actual circumstances. Calculations are produced by the model disclosed on the page and should not be used as guarantees or in advisory circumstances",br(),
                                       "- User retains liability over use and distribution of information through site",br(),
                                       br(),
-                                      "Copyright Victoria Liu 2020")),
+                                      "Copyright 2020 Victoria Liu")),
                           color = "black",
                           icon = icon("eye", lib = "font-awesome")
                         )
@@ -197,7 +197,7 @@ dashboardPage(
                         ),
                         tabBox(
                             title="Prediction",
-                            height="200px",
+                            height="300px",
                             tabPanel("Probability of Success", valueBoxOutput(width=12, "outProb")),
                             tabPanel("Odds of Success", valueBoxOutput(width=12, "outPred")),
                             tabPanel("Log-Odds Model", infoBoxOutput(width=12, "logoddsmodel")),
