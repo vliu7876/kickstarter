@@ -101,12 +101,14 @@ shinyServer(function(input, output, session) {
     output$projplot <- renderPlotly({
         #%>% group_by(country) %>% count(country, sort=TRUE)  
         if(input$country=="All Countries"){
-            kic1 <- kic() %>% filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL", "NZ", "JP", "HK", "SG")) %>% 
+            kic1 <- kic()  %>% filter(deadline >= req(input$dates[1]), deadline <= req(input$dates[2])) %>% 
+                filter(country %in% c("GB","US","CA","AU","IT","DE","FR", "NL", "NZ", "JP", "HK", "SG")) %>% 
                 mutate(countr = fct_lump(country, n=8)) %>% 
                 count(countr)
         }
         else{
-            kic1 <- kic() %>% filter(country %in% input$country) %>%
+            kic1 <- kic() %>% filter(deadline >= req(input$dates[1]), deadline <= req(input$dates[2])) %>%
+                filter(country %in% input$country) %>%
                 mutate(countr = fct_lump(country, n=8)) %>% 
                 count(countr)
         }
@@ -138,7 +140,7 @@ shinyServer(function(input, output, session) {
             value=total1,
             width=12,
             color="maroon",
-            subtitle="Total Pledged",
+            subtitle="Total USD Pledged",
             icon= icon("comments-dollar", lib = "font-awesome")
             
         )
@@ -189,7 +191,7 @@ shinyServer(function(input, output, session) {
         total1 <- sum(kic1$usd_goal_real) %>% prettyNum(big.mark = ",")
         valueBox(
             value=total1,
-            subtitle="Project Goals",
+            subtitle="Project USD Goals",
             color="orange",
             icon= icon("bullseye", lib = "font-awesome")
         )
@@ -207,7 +209,7 @@ shinyServer(function(input, output, session) {
         total2 <- (total1/len)*100
         
         valueBox(
-            value= total2 %>% prettyNum(big.mark = ","),
+            value= round(total2,2) %>% prettyNum(big.mark = ","),
             color="red",
             subtitle="Proportion of Success",
             icon= icon("percent", lib = "font-awesome")
@@ -230,12 +232,14 @@ shinyServer(function(input, output, session) {
         valueBox(
             value= total1 %>% prettyNum(big.mark = ","),
             color="light-blue",
-            subtitle="Total Funded",
+            subtitle="Total USD Funded",
             icon= icon("money-bill-wave", lib = "font-awesome")
         )
     })
     
     ## SECOND SIDE TAB
+    
+    ## UNDERSTANDING RELATIONSHIPS
     
     ## TAB 2 PROJECT COUNTRY/CATEGORY PLOT
     output$projbycountryplot <- renderPlotly({
@@ -511,7 +515,7 @@ shinyServer(function(input, output, session) {
         maxpledged <- max(kic1$usd_pledged_real) 
         extraction <- kic1[kic1$usd_pledged_real==maxpledged,]
         infoBox(
-            "Highest pledged",maxpledged %>% prettyNum(big.mark = ","),color="maroon", fill=TRUE,
+            "Highest USD pledged",maxpledged %>% prettyNum(big.mark = ","),color="maroon", fill=TRUE,
             icon= icon("money-bill-wave", lib = "font-awesome")
         )
 
@@ -530,9 +534,9 @@ shinyServer(function(input, output, session) {
         else{
             kic1 <- kic() %>% filter(country %in% input$country2ndtab) %>% filter(category %in% input$category2ndtab) 
         }
-
-        infoBox("Average pledged per project", 
-                mean(kic1$usd_pledged_real)%>% prettyNum(big.mark = ","), 
+        avgp <- mean(kic1$usd_pledged_real)
+        infoBox("Average USD pledged per project", 
+                round(avgp, 2) %>% prettyNum(big.mark = ","), 
                 color="teal", fill=TRUE,
                 icon= icon("comments-dollar", lib = "font-awesome")
         )
@@ -556,7 +560,8 @@ shinyServer(function(input, output, session) {
         extraction <- kic1[kic1$usd_pledged_real==maxpledged,]
         
         infoBox(
-            "Project Info", HTML(paste0("Name: ",extraction$name,br(), "Location: ", extraction$country)),
+            "Project Info", HTML(paste0("Name: ",extraction$name, br(), br(), "USD Raised: ", extraction$usd_pledged_real %>% prettyNum(big.mark = ","), br(), br(), 
+                                        "Status: ", extraction$state, br(), br(), "Location: ", extraction$country)),
             color = "orange",
             icon= icon("medal", lib = "font-awesome")
         )
@@ -597,9 +602,9 @@ shinyServer(function(input, output, session) {
         else{
             kic1 <- kic() %>% filter(country %in% input$country2ndtab) %>% filter(category %in% input$category2ndtab) 
         }
-
+        avgb <- mean(kic1$backers)
         infoBox("Average backers per project", 
-                mean(kic1$backers)%>% prettyNum(big.mark = ","), 
+                round(avgb, 0) %>% prettyNum(big.mark = ","), 
                 color="teal", fill=TRUE,
                 icon= icon("user-friends", lib = "font-awesome")
         )
@@ -622,7 +627,8 @@ shinyServer(function(input, output, session) {
         maxbackers <- max(kic1$backers) 
         extraction <- kic1[kic1$backers==maxbackers,]
         infoBox(
-            "Project Info", HTML(paste0("Name: ",extraction$name, br(),"Location: ", extraction$country)),
+            "Project Info", HTML(paste0("Name: ",extraction$name, br(), br(),"Backers: ", extraction$backers %>% prettyNum(big.mark = ","), br(), br(), 
+                                        "Status: ", extraction$state, br(), br(), "Location: ", extraction$country)),
             color = "orange",
             icon= icon("award", lib = "font-awesome")
         )
@@ -691,15 +697,15 @@ shinyServer(function(input, output, session) {
         if(input$location == "DE"){locval <- .08817}
         if(input$location == "FR"){locval <- .05614}
         if(input$location == "NL"){locval <- .0016974}
-        if(input$location == "JP"){locval <- .001517} ##rrr
-        if(input$location == "HK"){locval <- .03614}## rrr
-        if(input$location == "SG"){locval <- .036974} ## rrr
+        if(input$location == "JP"){locval <- .001517} ##added vals
+        if(input$location == "HK"){locval <- .03614}##added vals
+        if(input$location == "SG"){locval <- .036974} ##added vals 
         
         logodds <- .813+(-.0001974*input$goalslider+.04059*input$backerslider+-0.017372*input$dayslider+catval+locval)  
         odds <- exp(logodds)/(1+logodds)
         predprob <- odds/(1+odds) 
         if(predprob <= 0) {predprob <- 0}
-        # switch for category and country??
+        
         if(predprob >=1) {predprob <-1}
         infoBox(
             "probability", round(predprob,3), 
@@ -711,11 +717,22 @@ shinyServer(function(input, output, session) {
     })
     output$logoddsmodel <- renderInfoBox({
         infoBox(
-            "Category/Country Random Effects", "=.813-.0001974*Goal+.04059*Backers-0.017372*Days+Category+Country",
+            "Category/Country Random Effects", "=.813 - .0001974*Goal + .04059*Backers - 0.017372*Days + Category + Country",
             color="orange",
             icon=icon("equals", lib = "font-awesome"),
             fill=TRUE
         )
     })
+    
+    output$modelpriors <- renderInfoBox({
+        infoBox(
+            "Priors Utilised in Model", "Pledged, Goal, Backers, Time ~ N(0, sd=10000). Country, Category: Random Effects.",
+            color="olive",
+            icon=icon("filter", lib = "font-awesome"),
+            fill=TRUE
+        )
+    })
+    
+    
     
 })   

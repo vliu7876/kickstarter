@@ -31,6 +31,8 @@ dashboardPage(
     dashboardBody(
         tabItems(
             ## FIRST TAB
+          
+          ## PRELIM OBSREVATIONS
             tabItem(tabName = "Prelim",
                     fluidRow(
                         valueBox("Understanding Success On Kickstarter", "Data as of 3/3/2018 - Victoria Liu",
@@ -40,7 +42,7 @@ dashboardPage(
                         infoBox(
                             "Introduction", 
                             width=12,
-                            HTML(paste0("Kickstarter projects are funded through backers who pledge monetary support and when pledges meet project goals, they are funded.",br(),br(),"Now, around the world across different fields, let's explore indicators of success!",br())),
+                            HTML(paste0("Kickstarter projects are funded through backers who pledge monetary support and when pledges meet project goals, they are funded. Now, around the world across different fields, let's explore indicators of success on Kickstarter!",br())),
                             color = "green",
                             icon = icon("kickstarter-k", lib = "font-awesome")
                             ),
@@ -76,6 +78,18 @@ dashboardPage(
                             valueBoxOutput(width=4, "outbackers"),
                             valueBoxOutput(width=4, "outgoal"),
                             valueBoxOutput(width=4, "outsuccess")
+                        ),
+                        infoBox(
+                          "Disclaimer", 
+                          width=12,
+                          HTML(paste0("Please note: ", br(), "- Data for this site is from years 2009-2018", br(), 
+                                      "- All monetary amounts on the site are in USD real, converted regardless of original currency",br(),
+                                      "- Predictions on the third tab should be taken as estimations and not depictions of actual circumstances. Calculations are produced by the model disclosed on the page and should not be used as guarantees or in advisory circumstances",br(),
+                                      "- User retains liability over use and distribution of information through site",br(),
+                                      br(),
+                                      "Copyright Victoria Liu 2020")),
+                          color = "black",
+                          icon = icon("eye", lib = "font-awesome")
                         )
                        
 
@@ -84,6 +98,9 @@ dashboardPage(
             ),
             
             ## SECOND TAB
+            
+            ## UNDERSTANDING RELATIONSHIPS
+            
             tabItem(tabName = "Understanding",
                     fluidRow(
                         valueBox("Big Picture", "Projects By Segment",
@@ -146,7 +163,12 @@ dashboardPage(
                             valueBoxOutput(width=6, "maxbackersInfo")
                         )
                     )),
+            
+            
             ## THIRD TAB
+            
+            ## INFERENCE AND PREDICTION
+            
             tabItem(tabName="Inference",
                     fluidRow(
                         valueBox("Predicting Success", "What are your chances? Utilising values from 1MM samples from a Bayesian Generalized Linear Mixed Model",
@@ -178,7 +200,8 @@ dashboardPage(
                             height="200px",
                             tabPanel("Probability of Success", valueBoxOutput(width=12, "outProb")),
                             tabPanel("Odds of Success", valueBoxOutput(width=12, "outPred")),
-                            tabPanel("Log-Odds Model", infoBoxOutput(width=12, "logoddsmodel"))
+                            tabPanel("Log-Odds Model", infoBoxOutput(width=12, "logoddsmodel")),
+                            tabPanel("Model Priors", infoBoxOutput(width=12, "modelpriors"))
                         )
                         
                         
