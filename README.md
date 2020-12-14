@@ -1,3 +1,3 @@
 # kickstarter
 kickstarter visualization
-a line i wrote
+link: https://victoria-l.shinyapps.io/kickviz
