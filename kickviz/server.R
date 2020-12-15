@@ -120,7 +120,7 @@ shinyServer(function(input, output, session) {
                                 color=~countr) %>% 
             layout(title= "Project Totals By Country",
                    xaxis= list(title="Country(s)"),
-                   yaxis= list(title="Counts"))
+                   yaxis= list(title="Counts"))  %>% config(displayModeBar = F)
         countrychart
         return(countrychart)
         
@@ -269,7 +269,7 @@ shinyServer(function(input, output, session) {
             layout(title= "Number of Projects By Country",
                    xaxis= list(title="Counts"),
                    yaxis= list(title="Country(s)"),
-                   barmode= 'stack')
+                   barmode= 'stack')  %>% config(displayModeBar = F)
         return(projchart)
     })
     
@@ -307,7 +307,7 @@ shinyServer(function(input, output, session) {
             layout(title= "Funded Projects By Country",
                    xaxis= list(title="$"),
                    yaxis= list(title="Country(s)"),
-                   barmode='stack')
+                   barmode='stack') %>% config(displayModeBar = F)
         return(fundedchart)
         
     })
@@ -339,8 +339,8 @@ shinyServer(function(input, output, session) {
             layout(title= "Successful Goals",
                    yaxis= list(title="Counts"),
                    xaxis= list(title="Goal Amounts ($)"),
-                   barmode= 'stack')
-        return(sgoalhist) %>% config(displayModeBar = F)
+                   barmode= 'stack')  %>% config(displayModeBar = F)
+        return(sgoalhist)
         
     })
     output$unsuccessgoalhist <- renderPlotly({
@@ -367,8 +367,8 @@ shinyServer(function(input, output, session) {
             layout(title= "Unsuccessful Goals",
                    yaxis= list(title="Counts"), #, range=c(0,10000)),
                    xaxis= list(title="Goal Amounts ($)"), #, range=c(0,2000000)),
-                   barmode= 'stack')
-        return(usgoalhist) %>% config(displayModeBar = F)
+                   barmode= 'stack')  %>% config(displayModeBar = F)
+        return(usgoalhist)
         
     })
     
